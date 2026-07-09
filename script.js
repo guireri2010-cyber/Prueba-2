@@ -1,68 +1,80 @@
-const botonNo = document.getElementById("no");
-const botonSi = document.getElementById("si");
+const botonNo=document.getElementById("no");
+const botonSi=document.getElementById("si");
 
-const pregunta = document.getElementById("pregunta");
-const respuesta = document.getElementById("respuesta");
+const pregunta=document.getElementById("pregunta");
+const respuesta=document.getElementById("respuesta");
 
-function moverBoton(){
+let escapado=false;
 
-    const ancho = window.innerWidth - botonNo.offsetWidth;
-    const alto = window.innerHeight - botonNo.offsetHeight;
+function mover(){
 
-    botonNo.style.left = Math.random()*ancho + "px";
-    botonNo.style.top = Math.random()*alto + "px";
+    if(!escapado){
+
+        botonNo.style.position="fixed";
+
+        escapado=true;
+
+    }
+
+    const ancho=window.innerWidth-botonNo.offsetWidth-20;
+    const alto=window.innerHeight-botonNo.offsetHeight-20;
+
+    botonNo.style.left=Math.random()*ancho+"px";
+    botonNo.style.top=Math.random()*alto+"px";
 
 }
 
-botonNo.addEventListener("mouseenter", moverBoton);
-botonNo.addEventListener("click", moverBoton);
+botonNo.addEventListener("mouseenter",mover);
 
-botonSi.addEventListener("click",()=>{
+botonSi.onclick=()=>{
 
     pregunta.classList.add("oculto");
     respuesta.classList.remove("oculto");
 
-});
+};
 
 
-// Fondo animado
 
-const canvas = document.getElementById("fondo");
-const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// ====== FONDO CONSTELACIONES ======
 
-window.addEventListener("resize",()=>{
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+function resize(){
 
-});
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
 
-const particulas=[];
+}
 
-for(let i=0;i<120;i++){
+resize();
 
-    particulas.push({
+window.addEventListener("resize",resize);
+
+const puntos=[];
+
+for(let i=0;i<80;i++){
+
+    puntos.push({
 
         x:Math.random()*canvas.width,
         y:Math.random()*canvas.height,
-        r:Math.random()*3+1,
-        dx:(Math.random()-0.5)*0.5,
-        dy:(Math.random()-0.5)*0.5
+        dx:(Math.random()-0.5)*0.4,
+        dy:(Math.random()-0.5)*0.4,
+        r:Math.random()*2+1
 
     });
 
 }
 
-function animar(){
+function dibujar(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    ctx.fillStyle="white";
+    for(let i=0;i<puntos.length;i++){
 
-    particulas.forEach(p=>{
+        let p=puntos[i];
 
         p.x+=p.dx;
         p.y+=p.dy;
@@ -72,12 +84,35 @@ function animar(){
 
         ctx.beginPath();
         ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle="rgba(255,255,255,.85)";
         ctx.fill();
 
-    });
+        for(let j=i+1;j<puntos.length;j++){
 
-    requestAnimationFrame(animar);
+            let q=puntos[j];
+
+            let dist=Math.hypot(p.x-q.x,p.y-q.y);
+
+            if(dist<120){
+
+                ctx.beginPath();
+
+                ctx.moveTo(p.x,p.y);
+
+                ctx.lineTo(q.x,q.y);
+
+                ctx.strokeStyle="rgba(255,255,255,"+(1-dist/120)*0.3+")";
+
+                ctx.stroke();
+
+            }
+
+        }
+
+    }
+
+    requestAnimationFrame(dibujar);
 
 }
 
-animar();
+dibujar();
